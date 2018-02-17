@@ -12,7 +12,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -24,12 +24,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            output.packageLibrary.exclude("libs/*")
+            if (variant.name == android.buildTypes.release.name) {
+                outputFileName = output.outputFile.name.replace(("-release.aar"), "-${version}.aar")
+            } else if (variant.name == android.buildTypes.debug.name) {
+                outputFileName = output.outputFile.name.replace((".aar"), "-${version}.aar")
+            }
+        }
+    }
 }
 
 uploadArchives {
     repositories {
-        mavenDeployer {
+        mavenDeployer{
             repository url: "file://${repo.absolutePath}"
             pom.version = '0.1.0'
             pom.groupId = 'xyz.kuririnz'
