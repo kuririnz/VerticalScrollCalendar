@@ -45,6 +45,9 @@ class VerticalCalendarAdapter(c: Context
     private var selectRange = Array<Date?>(2, {null})
     private var calendar = GregorianCalendar()
 
+    /**
+     *
+     */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
 
         var currentDateIndex = 0
@@ -218,8 +221,8 @@ class VerticalCalendarAdapter(c: Context
      */
     class CalendarCellViewHolder(v: View): RecyclerView.ViewHolder(v) {
         val dayText: SqureTextView = v.findViewById(R.id.vc_item_date_text)
-        val toLeftRange: TextView = v.findViewById(R.id.vc_item_left_image)
-        val toRightRange: TextView = v.findViewById(R.id.vc_item_right_image)
+        val toLeftRange: View = v.findViewById(R.id.vc_item_left_image)
+        val toRightRange: View = v.findViewById(R.id.vc_item_right_image)
         var targetDate = Date()
     }
 
