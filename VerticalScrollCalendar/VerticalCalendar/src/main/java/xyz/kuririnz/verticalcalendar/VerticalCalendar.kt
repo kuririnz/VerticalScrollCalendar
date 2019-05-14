@@ -13,51 +13,18 @@ import java.util.*
  * Vertical Calendar View
  */
 class VerticalCalendar(context: Context
-                       , attributeSet: AttributeSet? = null
+                       , attributeSet: AttributeSet?
                        , defStyleAttr: Int = 0) : RecyclerView(context, attributeSet, defStyleAttr) {
-
-    /**
-     * selected status of enum class
-     */
-    enum class SelectStatus{
-        None,
-        First,
-        Second,
-        Cancel,
-    }
 
     private val c = context
     private var selectItem: ((start: Date?, end: Date?) -> Unit)? = null
     private var startDate = Date()
     private var numOfMonth:Int = 0
     private var selectState = SelectStatus.None
-    private var selectInfo = Array<Date?>(2, {null})
-    private lateinit var calendarAdapter: VerticalCalendarAdapter
-    private lateinit var lm: GridLayoutManager
-
-    // Constructor
-
-    constructor(context: Context, attributeSet: AttributeSet): this(context, attributeSet, 0) {
-        // load from xml resource
-        if (attributeSet != null) {
-            val attrs = context.theme.obtainStyledAttributes(attributeSet, R.styleable.VerticalCalendar, 0, 0)
-
-            try {
-                this.numOfMonth = attrs.getInt(R.styleable.VerticalCalendar_numOfMonth, 6)
-                val startDateStr = attrs.getString(R.styleable.VerticalCalendar_startDate)
-                if (startDateStr != null) {
-                    val df = SimpleDateFormat("yyyy/MM")
-                    this.startDate = df.parse(startDateStr)
-                    println("proocess of Vertical Calendar cell Tapped num is ${startDate}")
-                }
-            } finally {
-                attrs.recycle()
-            }
-        }
-
-        // initialize Calendar View Adapter
-        calendarAdapter = VerticalCalendarAdapter(c, numOfMonth) {index, dt ->
-            println("proocess of Vertical Calendar cell Tapped num is ${index}")
+    private var selectInfo = Array<Date?>(2) {null}
+    private val calendarAdapter: VerticalCalendarAdapter by lazy {
+        VerticalCalendarAdapter(c, numOfMonth) {index, dt ->
+            println("process of Vertical Calendar cell Tapped num is $index")
             when(selectState) {
                 SelectStatus.None -> { selectInfo[0] = dt }
                 SelectStatus.First -> { selectInfo[1] = dt }
@@ -65,9 +32,30 @@ class VerticalCalendar(context: Context
             }
             this.selectItem?.invoke(selectInfo[0], selectInfo[1])
         }
+    }
+    private val lm: GridLayoutManager by lazy { GridLayoutManager(context, 7) }
+
+    // Constructor
+
+    constructor(context: Context, attributeSet: AttributeSet?): this(context, attributeSet, 0) {
+        // load from xml resource
+        attributeSet?.let {
+            val attrs = context.theme.obtainStyledAttributes(it, R.styleable.VerticalCalendar, 0, 0)
+
+            try {
+                this.numOfMonth = attrs.getInt(R.styleable.VerticalCalendar_numOfMonth, 6)
+                attrs.getString(R.styleable.VerticalCalendar_startDate).let {
+                    startDateStr: String ->
+                    val df = SimpleDateFormat("yyyy/MM")
+                    this.startDate = df.parse(startDateStr)
+                    println("process of Vertical Calendar cell Tapped num is $startDate")
+                }
+            } finally {
+                attrs.recycle()
+            }
+        }
 
         // initialize to GridLayoutManager
-        lm = GridLayoutManager(context, 7)
         lm.spanSizeLookup = CalendarSpansizeLookUp(this.numOfMonth)
 
         // set require data
@@ -82,5 +70,16 @@ class VerticalCalendar(context: Context
      */
     fun setSelectItemListener(selectItemListener: ((start: Date?, end: Date?) -> Unit)) {
         this.selectItem = selectItemListener
+    }
+
+    companion object {
+        /**
+         * selected status of enum class
+         */
+        enum class SelectStatus{
+            None,
+            First,
+            Second,
+        }
     }
 }
